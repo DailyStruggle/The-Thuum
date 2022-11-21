@@ -1,0 +1,72 @@
+display:
+    audible chat: 2
+    audible command: 2
+    color: gold
+cooldown:
+    universal: true
+    alert message: It's been too soon since your last shout!
+    ready message: Your Thu'um is ready.
+    persistence: 100
+shouts:
+    fusrodah:
+        - 15
+        - 20
+        - 45
+    yoltoorshul:
+        - 30
+        - 50
+        - 100
+    lokvahkoor:
+        - 5
+        - 10
+        - 15
+    kaandremov:
+        - 40
+        - 50
+        - 60
+    wuldnahkest:
+        - 20
+        - 25
+        - 35
+    feimziigron:
+        - 20
+        - 30
+        - 40
+    laasyahnir:
+        - 30
+        - 40
+        - 50
+    hunkaalzoor:
+        - 180
+        - 180
+        - 180
+customshouts:
+    -
+        name       : I think, therefore, I am
+        description: This description shows up in the /help command
+        firstword  : cogito
+        secondword : ergo
+        thirdword  : sum
+        firstcommands:
+            - spawn
+            - say Hello!
+        secondcommands:
+            - say Goodbye!
+            - spawn
+        thirdcommands:
+            - say Cogito Ergo Sum only executes these commands
+            - say It doesn't execute the commands listed under secondcommands
+        
+    -
+        name       : Filler text
+        description: This description shows up in the /help command
+        firstword  : lorem
+        secondword : ipsum
+        thirdword  : dolor
+        firstcommands:
+            - say These commands are executed as the player
+        secondcommands:
+            - say As such, they can only do what the player has permission to do
+        thirdcommands:
+            - say I might add the feature to do console commands later
+        
