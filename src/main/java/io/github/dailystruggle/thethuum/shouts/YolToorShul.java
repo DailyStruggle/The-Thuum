@@ -5,6 +5,7 @@ import io.github.dailystruggle.thethuum.delays.RemoveEntity;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.SmallFireball;
@@ -28,7 +29,7 @@ public class YolToorShul implements Shout {
             Vector trajectory = new Vector();
             trajectory.copy(location.getDirection()).normalize();
             Location spawnFireball = location.clone().add(trajectory);
-            LinkedList<Vector> Lateral = new LinkedList();
+            LinkedList<Vector> Lateral = new LinkedList<>();
             Vector LateralSide = new Vector(0, 1, 0).crossProduct(trajectory).normalize();
             Vector LateralTop = new Vector().copy(trajectory).crossProduct(LateralSide).normalize();
             Lateral.add(LateralTop);
@@ -36,7 +37,7 @@ public class YolToorShul implements Shout {
             Lateral.add(LateralSide);
 
             for(int i = level - 1; i > 0; --i) {
-                LinkedList<Vector> newLateral = new LinkedList();
+                LinkedList<Vector> newLateral = new LinkedList<>();
 
                 for(Vector combineOne : Lateral) {
                     for(Vector combineTwo : Lateral) {
@@ -52,7 +53,7 @@ public class YolToorShul implements Shout {
                 Lateral.addAll(newLateral);
             }
 
-            LinkedList<Vector> newLateral = new LinkedList();
+            LinkedList<Vector> newLateral = new LinkedList<>();
 
             for(Vector flipMe : Lateral) {
                 newLateral.add(new Vector().zero().subtract(flipMe));
@@ -62,6 +63,8 @@ public class YolToorShul implements Shout {
             Lateral.add(new Vector().zero());
 
             for(Vector offset : Lateral) {
+                World world = location.getWorld();
+                if(world == null) return;
                 Fireball fireball = location.getWorld().spawn(spawnFireball.clone().add(offset), SmallFireball.class);
                 fireball.setVelocity(trajectory);
                 fireball.setDirection(trajectory);

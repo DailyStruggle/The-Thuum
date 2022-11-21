@@ -42,7 +42,7 @@ public class KaanDremOv implements Shout, Listener {
 
     @EventHandler
     public void onEntityTarget(EntityTargetEvent event) {
-        if (this.peaced.containsKey(event.getEntity())) {
+        if (this.peaced.containsKey(event.getEntity().getUniqueId())) {
             event.setCancelled(true);
         }
     }

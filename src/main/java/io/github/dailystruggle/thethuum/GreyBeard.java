@@ -4,12 +4,11 @@ import io.github.dailystruggle.thethuum.shouts.Shout;
 import io.github.dailystruggle.thethuum.shouts.ShoutType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -19,9 +18,8 @@ import java.util.Hashtable;
 import java.util.Set;
 
 public class GreyBeard implements Listener {
-    public HashMap<String, Shout> ShoutTable = new HashMap();
-    Configuration shoutCooldowns;
-    Hashtable<String, Set<Shout>> onCooldown = new Hashtable();
+    public HashMap<String, Shout> ShoutTable = new HashMap<>();
+    Hashtable<String, Set<Shout>> onCooldown = new Hashtable<>();
 
     public GreyBeard() {
     }
@@ -29,7 +27,7 @@ public class GreyBeard implements Listener {
     @EventHandler(
             priority = EventPriority.HIGH
     )
-    public void onPlayerChat(PlayerChatEvent event) {
+    public void onPlayerChat(AsyncPlayerChatEvent event) {
         if (!event.isCancelled()) {
             String parsed = event.getMessage().toLowerCase().replaceAll("[^A-Za-z\\s]", "");
             String[] message = parsed.split(" ", 4);
@@ -37,18 +35,21 @@ public class GreyBeard implements Listener {
             if (length != 4) {
                 if (this.ShoutTable.containsKey(parsed)) {
                     int power = message.length;
-                    switch(Plugin.getInstance().getConfig().getInt("display.audible chat")) {
-                        case 1:
-                            event.getPlayer()
-                                    .sendMessage(ChatColor.valueOf(Plugin.getInstance().getConfig().getString("display.color").toUpperCase()) + event.getMessage());
-                        case 0:
-                            event.setCancelled(true);
-                            break;
-                        case 2:
-                            event.setMessage(ChatColor.valueOf(Plugin.getInstance().getConfig().getString("display.color").toUpperCase()) + event.getMessage());
-                    }
+                    String string = Plugin.getInstance().getConfig().getString("display.color");
+                    if(string!=null && !string.isEmpty()) {
+                        switch (Plugin.getInstance().getConfig().getInt("display.audible chat")) {
+                            case 1:
+                                event.getPlayer()
+                                        .sendMessage(ChatColor.valueOf(string.toUpperCase()) + event.getMessage());
+                            case 0:
+                                event.setCancelled(true);
+                                break;
+                            case 2:
+                                event.setMessage(ChatColor.valueOf(string.toUpperCase()) + event.getMessage());
+                        }
 
-                    shout(event.getPlayer(), this.ShoutTable.get(parsed), power);
+                        shout(event.getPlayer(), this.ShoutTable.get(parsed), power);
+                    }
                 }
             }
         }
@@ -83,17 +84,20 @@ public class GreyBeard implements Listener {
 
                     int audible = Plugin.getInstance().getConfig().getInt("display.audible command");
                     if (audible > 0) {
-                        StringBuilder say = new StringBuilder(ChatColor.valueOf(Plugin.getInstance().getConfig().getString("display.color").toUpperCase()).toString());
+                        String string = Plugin.getInstance().getConfig().getString("display.color");
+                        if(string!=null) {
+                            StringBuilder say = new StringBuilder(ChatColor.valueOf(string.toUpperCase()).toString());
 
-                        for(int i = 0; i < power; ++i) {
-                            say.append(this.ShoutTable.get(message[0]).words()[i].toUpperCase()).append(" ");
-                        }
+                            for(int i = 0; i < power; ++i) {
+                                say.append(this.ShoutTable.get(message[0]).words()[i].toUpperCase()).append(" ");
+                            }
 
-                        say.insert(say.length() - 1, '!');
-                        if (audible == 1) {
-                            dovahkiin.sendMessage(say.toString());
-                        } else if (audible == 2) {
-                            dovahkiin.chat(say.toString());
+                            say.insert(say.length() - 1, '!');
+                            if (audible == 1) {
+                                dovahkiin.sendMessage(say.toString());
+                            } else if (audible == 2) {
+                                dovahkiin.chat(say.toString());
+                            }
                         }
                     }
 
@@ -105,11 +109,13 @@ public class GreyBeard implements Listener {
 
     public static void shout(Player dragonBorn, Shout word, int level) {
         if (level <= 3 && level >= 0) {
+            Plugin instance = Plugin.getInstance();
             String shoutName = word.words()[0] + word.words()[1] + word.words()[2];
             if (dragonBorn.hasPermission("thuum.shout." + shoutName + "." + level)) {
                 if (!dragonBorn.hasPermission("thuum.ignorecooldown." + shoutName + "." + level)
-                        && !Plugin.getInstance().arngeir.putOnCooldown(dragonBorn, word, level)) {
-                    dragonBorn.sendMessage(Plugin.getInstance().getConfig().getString("cooldown.alert message"));
+                        && !instance.arngeir.putOnCooldown(dragonBorn, word, level)) {
+                    String string = instance.getConfig().getString("cooldown.alert message");
+                    if(string!=null && !string.isEmpty()) dragonBorn.sendMessage(string);
                 } else {
                     word.shout(dragonBorn, level);
                 }
@@ -120,7 +126,7 @@ public class GreyBeard implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         int persistence = Plugin.getInstance().getConfig().getInt("cooldown.persistence");
-        Bukkit.getScheduler().scheduleSyncDelayedTask(Plugin.getInstance(), new GreyBeard.ClearCooldowns(event.getPlayer()), persistence * 20);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(Plugin.getInstance(), new GreyBeard.ClearCooldowns(event.getPlayer()), persistence * 20L);
     }
 
     public boolean putOnCooldown(Player dovahkiin, Shout shout, int level) {
@@ -131,7 +137,7 @@ public class GreyBeard implements Listener {
         }
 
         if (!this.onCooldown.containsKey(dovahkiin.getName())) {
-            this.onCooldown.put(dovahkiin.getName(), new HashSet());
+            this.onCooldown.put(dovahkiin.getName(), new HashSet<>());
         }
 
         if (this.onCooldown.get(dovahkiin.getName()).contains(shout)) {
@@ -170,7 +176,8 @@ public class GreyBeard implements Listener {
         public void run() {
             if (onCooldown.containsKey(this.dovahkiin.getName())) {
                 onCooldown.get(this.dovahkiin.getName()).remove(this.shout);
-                this.dovahkiin.sendMessage(Plugin.getInstance().getConfig().getString("cooldown.ready message"));
+                String string = Plugin.getInstance().getConfig().getString("cooldown.ready message");
+                if(string!=null && !string.isEmpty()) this.dovahkiin.sendMessage();
             }
         }
     }

@@ -18,18 +18,18 @@ public class WuldNahKest implements Shout {
     }
 
     public void shout(Player dovahkiin, int level) {
-        Bukkit.getScheduler().scheduleSyncDelayedTask(Plugin.getInstance(), new WuldNahKest.SetSpeed(dovahkiin.getVelocity(), dovahkiin, 1), 3 + level);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(Plugin.getInstance(), new SetSpeed(dovahkiin.getVelocity(), dovahkiin, 1), 3 + level);
         Vector heading = dovahkiin.getEyeLocation().getDirection();
         Vector dash = new Vector();
         dash.copy(heading).setY(0).normalize();
         dash.multiply(multiplier[level - 1]).setY(0.3);
         dovahkiin.setVelocity(dash);
-        WuldNahKest.SetSpeed task = new WuldNahKest.SetSpeed(dash, dovahkiin, 2 + level);
+        WuldNahKest.SetSpeed task = new SetSpeed(dash, dovahkiin, 2 + level);
         task.id = Bukkit.getScheduler().scheduleSyncRepeatingTask(Plugin.getInstance(), task, 0L, 1L);
         dovahkiin.getWorld().createExplosion(dovahkiin.getLocation(), 0.0F);
     }
 
-    class SetSpeed implements Runnable {
+    static class SetSpeed implements Runnable {
         int id;
         int ticks;
         Vector speed;

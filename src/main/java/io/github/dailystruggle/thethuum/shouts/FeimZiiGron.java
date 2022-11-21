@@ -43,7 +43,7 @@ public class FeimZiiGron implements Shout, Listener {
     @EventHandler
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
         if (event.getEntity() instanceof Player) {
-            if (this.invincible.containsKey(event.getEntity()) && event.getFoodLevel() < event.getEntity().getFoodLevel()) {
+            if (this.invincible.containsKey(event.getEntity().getUniqueId()) && event.getFoodLevel() < event.getEntity().getFoodLevel()) {
                 event.setCancelled(true);
             }
         }
@@ -58,7 +58,7 @@ public class FeimZiiGron implements Shout, Listener {
         }
 
         public void run() {
-            if (FeimZiiGron.this.invincible.containsKey(this.dovahkiin)) {
+            if (FeimZiiGron.this.invincible.containsKey(this.dovahkiin.getUniqueId())) {
                 this.dovahkiin.playEffect(this.dovahkiin.getLocation().add(0.0, 1.0, 0.0), Effect.ENDER_SIGNAL, 0);
             } else {
                 Bukkit.getScheduler().cancelTask(this.id);

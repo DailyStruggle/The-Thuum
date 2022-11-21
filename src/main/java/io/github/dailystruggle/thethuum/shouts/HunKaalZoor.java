@@ -1,13 +1,11 @@
 package io.github.dailystruggle.thethuum.shouts;
 
 
-
-
 import io.github.dailystruggle.thethuum.Plugin;
 import io.github.dailystruggle.thethuum.delays.RemoveEntity;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
+import org.bukkit.World;
 import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -25,7 +23,9 @@ public class HunKaalZoor implements Shout {
 
     public void shout(Player dovahkiin, int level) {
         Location spawnHere = dovahkiin.getLastTwoTargetBlocks(null, 30).get(0).getLocation();
-        LivingEntity hero = (LivingEntity)spawnHere.getWorld().spawnEntity(spawnHere, this.heroes[level - 1]);
+        World world = spawnHere.getWorld();
+        if(world == null) return;
+        LivingEntity hero = (LivingEntity) world.spawnEntity(spawnHere, this.heroes[level - 1]);
         if (hero instanceof Tameable) {
             ((Tameable)hero).setOwner(dovahkiin);
         } else if (hero instanceof IronGolem) {
@@ -33,7 +33,7 @@ public class HunKaalZoor implements Shout {
         }
 
         hero.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 1200, 20));
-        spawnHere.getWorld().createExplosion(spawnHere, 0.0F, false);
+        world.createExplosion(spawnHere, 0.0F, false);
         Bukkit.getScheduler().scheduleSyncDelayedTask(Plugin.getInstance(), new RemoveEntity(hero, true), 1200L);
     }
 }

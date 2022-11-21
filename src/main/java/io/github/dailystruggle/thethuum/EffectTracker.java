@@ -8,8 +8,6 @@ import java.util.Hashtable;
 import java.util.UUID;
 
 public class EffectTracker extends Hashtable<UUID, EffectTracker.EffectCooldown> {
-    private static final long serialVersionUID = -6363176253052499818L;
-
     public EffectTracker() {
     }
 

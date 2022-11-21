@@ -20,7 +20,7 @@ public class LokVahKoor implements Shout {
     public void shout(Player dovahkiin, int level) {
         World world = dovahkiin.getWorld();
         if (level != 3) {
-            int stormDuration = 0;
+            int stormDuration;
             int thunderDuration = 0;
             if (world.hasStorm()) {
                 stormDuration = world.getWeatherDuration();
@@ -28,7 +28,7 @@ public class LokVahKoor implements Shout {
                     thunderDuration = world.getThunderDuration();
                 }
 
-                Bukkit.getScheduler().scheduleSyncDelayedTask(Plugin.getInstance(), new Storm(world, thunderDuration, stormDuration), level * 200);
+                Bukkit.getScheduler().scheduleSyncDelayedTask(Plugin.getInstance(), new Storm(world, thunderDuration, stormDuration), level * 200L);
             }
         }
 
