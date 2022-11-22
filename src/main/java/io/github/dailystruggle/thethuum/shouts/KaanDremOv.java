@@ -5,6 +5,7 @@ package io.github.dailystruggle.thethuum.shouts;
 
 import io.github.dailystruggle.thethuum.EffectTracker;
 import io.github.dailystruggle.thethuum.Shared;
+import io.github.dailystruggle.thethuum.tools.SendMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
@@ -40,7 +41,7 @@ public class KaanDremOv implements Shout, Listener {
             }
         }
 
-        p.sendMessage("You calmed " + peaceThese.size() + " creatures.");
+        SendMessage.sendMessage(p, "You calmed " + peaceThese.size() + " creatures.");
         this.peaced.addAll(peaceThese, (30 + 20 * level) * 20);
     }
 

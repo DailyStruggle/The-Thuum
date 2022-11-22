@@ -40,7 +40,7 @@ public class GreyBeard implements Listener {
                         colorStr = SendMessage.format(event.getPlayer(), colorStr);
                         switch (Plugin.getInstance().getConfig().getInt("display.audible chat")) {
                             case 1:
-                                event.getPlayer().sendMessage(eventMessage);
+                                SendMessage.sendMessage(event.getPlayer(), eventMessage);
                             case 0:
                                 event.setCancelled(true);
                                 break;
@@ -68,7 +68,7 @@ public class GreyBeard implements Listener {
                 if (!p.hasPermission("thuum.ignorecooldown." + shoutName + "." + level)
                         && !instance.arngeir.putOnCooldown(p, word, level)) {
                     String string = instance.getConfig().getString("cooldown.alert message");
-                    if(string!=null && !string.isEmpty()) p.sendMessage(string);
+                    if(string!=null && !string.isEmpty()) SendMessage.sendMessage(p,string);
                 } else {
                     word.shout(dragonBorn, level);
                 }
@@ -130,7 +130,7 @@ public class GreyBeard implements Listener {
                 String string = Plugin.getInstance().getConfig().getString("cooldown.ready message");
                 if(string!=null && !string.isEmpty()) {
                     Player player = Bukkit.getPlayer(uuid);
-                    if(player!=null && player.isOnline()) player.sendMessage(string);
+                    if(player!=null && player.isOnline()) SendMessage.sendMessage(player,string);
                 }
             }
         }
