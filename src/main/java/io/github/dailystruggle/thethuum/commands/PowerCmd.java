@@ -2,14 +2,12 @@ package io.github.dailystruggle.thethuum.commands;
 
 import io.github.dailystruggle.commandsapi.bukkit.localCommands.BukkitTreeCommand;
 import io.github.dailystruggle.commandsapi.common.CommandsAPICommand;
-import io.github.dailystruggle.thethuum.GreyBeard;
+import io.github.dailystruggle.thethuum.Plugin;
 import io.github.dailystruggle.thethuum.shouts.Shout;
 import io.github.dailystruggle.thethuum.tools.SendMessage;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -33,39 +31,18 @@ public class PowerCmd extends BukkitTreeCommand {
             SendMessage.sendMessage(sender,"console shouts not supported");
             return true;
         }
-        Player player = (Player) sender;
         HashMap<String, Shout> ShoutTable = io.github.dailystruggle.thethuum.Plugin.getInstance().arngeir.ShoutTable;
-        String parsed = parent().name();
 
-        int audible = io.github.dailystruggle.thethuum.Plugin.getInstance().getConfig().getInt("display.audible command");
-        if (audible > 0) {
-            String string = io.github.dailystruggle.thethuum.Plugin.getInstance().getConfig().getString("display.color");
-            if(string!=null) {
-                StringBuilder say = new StringBuilder(ChatColor.valueOf(string.toUpperCase()).toString());
-
-                String name = parent().name();
-
-                Shout shout = ShoutTable.get(name);
-
-                for(int i = 0; i < pwr; ++i) {
-                    say.append(shout.words()[i].toUpperCase()).append(" ");
-                }
-
-                say.insert(say.length() - 1, '!');
-                if (audible == 1) {
-                    SendMessage.sendMessage(sender,say.toString());
-                } else if (audible == 2) {
-                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                        SendMessage.sendMessage(onlinePlayer,say.toString());
-                    }
-                }
-            }
+        StringBuilder say = new StringBuilder();
+        String name = parent().name();
+        Shout shout = ShoutTable.get(name);
+        for(int i = 0; i < pwr && i < 3; ++i) {
+            say.append(shout.words()[i]).append(" ");
         }
+        say.deleteCharAt(say.length()-1);
 
-        if(Bukkit.isPrimaryThread()) GreyBeard.shout(player.getUniqueId(), ShoutTable.get(parsed), pwr);
-        else Bukkit.getScheduler().runTask(io.github.dailystruggle.thethuum.Plugin.getInstance(),
-                () -> GreyBeard.shout(player.getUniqueId(), ShoutTable.get(parsed), pwr));
-
+        if(Bukkit.isPrimaryThread()) ((Player) sender).chat(say.toString());
+        else Bukkit.getScheduler().runTask(Plugin.getInstance(),()->((Player) sender).chat(say.toString()));
         return false;
     }
 

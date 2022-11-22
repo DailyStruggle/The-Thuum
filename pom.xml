@@ -6,7 +6,7 @@
 
     <groupId>io.github.dailystruggle</groupId>
     <artifactId>TheThuum</artifactId>
-    <version>1.0.0-BETA01</version>
+    <version>1.0.0-BETA02</version>
     <packaging>jar</packaging>
 
     <name>TheThuum</name>

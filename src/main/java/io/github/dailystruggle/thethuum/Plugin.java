@@ -21,7 +21,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.logging.Logger;
 
 public class Plugin extends JavaPlugin {
@@ -38,8 +37,8 @@ public class Plugin extends JavaPlugin {
     }
 
     public void onEnable() {
-        this.getConfig().options().copyDefaults(true);
-        this.saveConfig();
+        saveDefaultConfig();
+
         instance = this;
         this.arngeir = new GreyBeard();
         this.log = Logger.getLogger("Minecraft");
@@ -122,7 +121,6 @@ public class Plugin extends JavaPlugin {
         try {
             Field f = Bukkit.getPluginManager().getClass().getDeclaredField("commandMap");
             f.setAccessible(true);
-
             commandMap = (CommandMap) f.get(Bukkit.getPluginManager());
         } catch (NoSuchFieldException | IllegalAccessException | IllegalArgumentException | SecurityException e) {
             e.printStackTrace();

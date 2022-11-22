@@ -101,13 +101,21 @@ public class SendMessage {
     public static String formatDry(OfflinePlayer player, String text) {
         if(text == null) return "";
 
+        try {
+            ChatColor color = ChatColor.valueOf(text.toUpperCase());
+            text = color.toString();
+            return text;
+        } catch (IllegalArgumentException ignored) {
+
+        }
+
         //check PAPI exists and fill remaining PAPI placeholders
         //todo: if a null player doesn't work with another PAPI import, blame that import for not verifying its inputs.
         text = PAPIChecker.fillPlaceholders(player,text);
 
-
         text = ChatColor.translateAlternateColorCodes('&',text);
         text = Hex2Color(text);
+
         return text;
     }
 
