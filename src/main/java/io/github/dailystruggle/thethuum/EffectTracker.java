@@ -11,10 +11,10 @@ public class EffectTracker extends Hashtable<UUID, EffectTracker.EffectCooldown>
     public EffectTracker() {
     }
 
-    public void add(Entity effectsThis, int duration) {
+    public void add(UUID effectsThis, int duration) {
         EffectCooldown cooldown = new EffectCooldown(effectsThis);
         Bukkit.getScheduler().scheduleSyncDelayedTask(Plugin.getInstance(), cooldown, duration);
-        this.put(effectsThis.getUniqueId(), cooldown);
+        this.put(effectsThis, cooldown);
     }
 
     public void addAll(Collection<Entity> effectsThese, int duration) {
@@ -27,16 +27,14 @@ public class EffectTracker extends Hashtable<UUID, EffectTracker.EffectCooldown>
     }
 
     public class EffectCooldown implements Runnable {
-        Entity target;
+        UUID target;
 
-        public EffectCooldown(Entity effectsThis) {
+        public EffectCooldown(UUID effectsThis) {
             this.target = effectsThis;
         }
 
         public void run() {
-            if (containsKey(this.target) && get(this.target) == this) {
-                remove(this.target);
-            }
+            remove(this.target);
         }
     }
 

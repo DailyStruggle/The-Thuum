@@ -3,6 +3,8 @@ package io.github.dailystruggle.thethuum.shouts;
 
 
 import io.github.dailystruggle.thethuum.Plugin;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -11,6 +13,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 public class StrunBahQo implements Shout {
     private final String[] words = new String[]{"strun", "bah", "qo", "Storm Call", "Summons a storm that hits things with lightning."};
@@ -23,11 +26,14 @@ public class StrunBahQo implements Shout {
         return this.words;
     }
 
-    public void shout(Player dovahkiin, int level) {
+    public void shout(UUID dovahkiin, int level) {
+        Player p = Bukkit.getPlayer(dovahkiin);
+        if(p == null || !p.isOnline()) return;
         int duration = 1200 * level;
-        new StrunBahQo.lightningStorm(duration, dovahkiin, Plugin.getInstance(), Plugin.getInstance().getServer().getScheduler());
-        dovahkiin.getWorld().setStorm(true);
-        dovahkiin.getWorld().setThundering(true);
+        new StrunBahQo.lightningStorm(duration, p, Plugin.getInstance(), Plugin.getInstance().getServer().getScheduler());
+        World world = p.getWorld();
+        world.setStorm(true);
+        world.setThundering(true);
     }
 
     private class lightningStorm implements Runnable {

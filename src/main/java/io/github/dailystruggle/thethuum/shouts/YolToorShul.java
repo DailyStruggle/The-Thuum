@@ -12,6 +12,7 @@ import org.bukkit.entity.SmallFireball;
 import org.bukkit.util.Vector;
 
 import java.util.LinkedList;
+import java.util.UUID;
 
 public class YolToorShul implements Shout {
     private final String[] words = new String[]{"yol", "toor", "shul", "Fire Breath", "Sets things in front of you on fire."};
@@ -23,14 +24,16 @@ public class YolToorShul implements Shout {
         return this.words;
     }
 
-    public void shout(Player dovahkiin, int level) {
+    public void shout(UUID dovahkiin, int level) {
+        Player p = Bukkit.getPlayer(dovahkiin);
+        if(p == null || !p.isOnline()) return;
         if (level <= 3 && level >= 0) {
-            Location location = dovahkiin.getEyeLocation();
+            Location location = p.getEyeLocation();
             Vector trajectory = new Vector();
             trajectory.copy(location.getDirection()).normalize();
             Location spawnFireball = location.clone().add(trajectory);
             LinkedList<Vector> Lateral = new LinkedList<>();
-            Vector LateralSide = new Vector(0, 1, 0).crossProduct(trajectory).normalize();
+            Vector LateralSide = new Vector(0.0d, 1.0d, 0.0d).crossProduct(trajectory).normalize();
             Vector LateralTop = new Vector().copy(trajectory).crossProduct(LateralSide).normalize();
             Lateral.add(LateralTop);
             Lateral.add(new Vector().zero().subtract(LateralTop));
@@ -43,7 +46,10 @@ public class YolToorShul implements Shout {
                     for(Vector combineTwo : Lateral) {
                         Vector addMe = new Vector().copy(combineOne).add(combineTwo);
                         if (level != 3 || i != 1) {
-                            addMe.normalize();
+                            double length = addMe.length();
+                            if(length!=0) {
+                                addMe.normalize();
+                            }
                         }
 
                         newLateral.add(addMe);
@@ -65,16 +71,16 @@ public class YolToorShul implements Shout {
             for(Vector offset : Lateral) {
                 World world = location.getWorld();
                 if(world == null) return;
-                Fireball fireball = location.getWorld().spawn(spawnFireball.clone().add(offset), SmallFireball.class);
+                Fireball fireball = world.spawn(spawnFireball.clone().add(offset), SmallFireball.class);
                 fireball.setVelocity(trajectory);
                 fireball.setDirection(trajectory);
-                fireball.setShooter(dovahkiin);
+                fireball.setShooter(p);
                 fireball.setIsIncendiary(true);
                 fireball.setYield(0.4F);
                 Bukkit.getScheduler().scheduleSyncDelayedTask(Plugin.getInstance(), new RemoveEntity(fireball), 15L);
             }
 
-            dovahkiin.getWorld().playEffect(dovahkiin.getLocation(), Effect.BLAZE_SHOOT, 0, 40);
+            p.getWorld().playEffect(p.getLocation(), Effect.BLAZE_SHOOT, 0, 40);
         }
     }
 }

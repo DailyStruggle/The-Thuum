@@ -1,4 +1,12 @@
 name: TheThuum
 main: io.github.dailystruggle.thethuum.Plugin
-version: 1.0-SNAPSHOT
-api-version: 1.19
+version: ${project.version}
+api-version: 1.13
+softdepend: [PlaceholderAPI]
+
+commands:
+  shout:
+    description: speak dragon
+    permission: thuum.shout
+    usage: |
+      /shout

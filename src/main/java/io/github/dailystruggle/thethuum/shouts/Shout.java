@@ -1,9 +1,9 @@
 package io.github.dailystruggle.thethuum.shouts;
 
-import org.bukkit.entity.Player;
+import java.util.UUID;
 
 public interface Shout {
     String[] words();
 
-    void shout(Player var1, int var2);
+    void shout(UUID var1, int var2);
 }

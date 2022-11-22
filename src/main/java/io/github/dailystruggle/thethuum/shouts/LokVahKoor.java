@@ -7,6 +7,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import java.util.UUID;
+
 public class LokVahKoor implements Shout {
     private final String[] words = new String[]{"lok", "vah", "koor", "Clear Skies", "Temporarily calms a storm."};
 
@@ -17,8 +19,10 @@ public class LokVahKoor implements Shout {
         return this.words;
     }
 
-    public void shout(Player dovahkiin, int level) {
-        World world = dovahkiin.getWorld();
+    public void shout(UUID dovahkiin, int level) {
+        Player p = Bukkit.getPlayer(dovahkiin);
+        if(p == null || !p.isOnline()) return;
+        World world = p.getWorld();
         if (level != 3) {
             int stormDuration;
             int thunderDuration = 0;

@@ -27,7 +27,9 @@ public class LaasYahNir implements Shout {
         return this.words;
     }
 
-    public void shout(Player dovahkiin, int level) {
+    public void shout(UUID dovahkiin, int level) {
+        Player p = Bukkit.getPlayer(dovahkiin);
+        if(p == null || !p.isOnline()) return;
         if (this.task == null) {
             this.task = new LaasYahNir.Glow();
             this.task.id = Bukkit.getScheduler().scheduleSyncRepeatingTask(Plugin.getInstance(), this.task, 0L, 20L);
@@ -35,7 +37,7 @@ public class LaasYahNir implements Shout {
 
         List<Entity> entities = new LinkedList<>();
 
-        for(Entity test : dovahkiin.getNearbyEntities(90.0, 90.0, 90.0)) {
+        for(Entity test : p.getNearbyEntities(90.0, 90.0, 90.0)) {
             if (test instanceof LivingEntity) {
                 entities.add(test);
             }

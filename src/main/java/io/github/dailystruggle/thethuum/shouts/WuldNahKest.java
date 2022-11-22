@@ -7,6 +7,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
+import java.util.UUID;
+
 public class WuldNahKest implements Shout {
     static final double[] multiplier = new double[]{5.5, 5.8, 6.6};
 
@@ -17,16 +19,18 @@ public class WuldNahKest implements Shout {
         return new String[]{"wuld", "nah", "kest", "Whirlwind Sprint", "Rushes the dovahkiin forward."};
     }
 
-    public void shout(Player dovahkiin, int level) {
-        Bukkit.getScheduler().scheduleSyncDelayedTask(Plugin.getInstance(), new SetSpeed(dovahkiin.getVelocity(), dovahkiin, 1), 3 + level);
-        Vector heading = dovahkiin.getEyeLocation().getDirection();
+    public void shout(UUID dovahkiin, int level) {
+        Player p = Bukkit.getPlayer(dovahkiin);
+        if(p == null || !p.isOnline()) return;
+        Bukkit.getScheduler().scheduleSyncDelayedTask(Plugin.getInstance(), new SetSpeed(p.getVelocity(), p, 1), 3 + level);
+        Vector heading = p.getEyeLocation().getDirection();
         Vector dash = new Vector();
         dash.copy(heading).setY(0).normalize();
         dash.multiply(multiplier[level - 1]).setY(0.3);
-        dovahkiin.setVelocity(dash);
-        WuldNahKest.SetSpeed task = new SetSpeed(dash, dovahkiin, 2 + level);
+        p.setVelocity(dash);
+        WuldNahKest.SetSpeed task = new SetSpeed(dash, p, 2 + level);
         task.id = Bukkit.getScheduler().scheduleSyncRepeatingTask(Plugin.getInstance(), task, 0L, 1L);
-        dovahkiin.getWorld().createExplosion(dovahkiin.getLocation(), 0.0F);
+        p.getWorld().createExplosion(p.getLocation(), 0.0F);
     }
 
     static class SetSpeed implements Runnable {

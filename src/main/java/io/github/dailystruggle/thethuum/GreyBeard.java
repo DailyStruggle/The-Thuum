@@ -2,6 +2,7 @@ package io.github.dailystruggle.thethuum;
 
 import io.github.dailystruggle.thethuum.shouts.Shout;
 import io.github.dailystruggle.thethuum.shouts.ShoutType;
+import io.github.dailystruggle.thethuum.tools.SendMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -12,14 +13,11 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Set;
+import java.util.*;
 
 public class GreyBeard implements Listener {
     public HashMap<String, Shout> ShoutTable = new HashMap<>();
-    Hashtable<String, Set<Shout>> onCooldown = new Hashtable<>();
+    Hashtable<UUID, Set<Shout>> onCooldown = new Hashtable<>();
 
     public GreyBeard() {
     }
@@ -45,77 +43,85 @@ public class GreyBeard implements Listener {
                                 event.setCancelled(true);
                                 break;
                             case 2:
-                                event.setMessage(ChatColor.valueOf(string.toUpperCase()) + event.getMessage());
+                                String format = event.getFormat();
+                                int i = format.indexOf("%s:");
+                                if(i<0) format = ChatColor.valueOf(string.toUpperCase()) + format;
+                                else format = format.substring(0,i) + ChatColor.valueOf(string.toUpperCase()) + format.substring(i);
+                                event.setFormat(format);
                         }
 
-                        shout(event.getPlayer(), this.ShoutTable.get(parsed), power);
+                        if(Bukkit.isPrimaryThread()) shout(event.getPlayer().getUniqueId(), this.ShoutTable.get(parsed), power);
+                        else Bukkit.getScheduler().runTask(Plugin.getInstance(),
+                                () -> shout(event.getPlayer().getUniqueId(), this.ShoutTable.get(parsed), power));
                     }
                 }
             }
         }
     }
 
-    @EventHandler(
-            priority = EventPriority.HIGH
-    )
-    public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
-        if (!event.isCancelled()) {
-            Player dovahkiin = event.getPlayer();
-            String[] message = event.getMessage().split(" ");
-            message[0] = message[0].substring(1);
-            if (message.length <= 2) {
-                if (this.ShoutTable.containsKey(message[0])) {
-                    int power = 1;
-                    event.setCancelled(true);
+//    @EventHandler(
+//            priority = EventPriority.HIGH
+//    )
+//    public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
+//        if (!event.isCancelled()) {
+//            Player dovahkiin = event.getPlayer();
+//            String[] message = event.getMessage().split(" ");
+//            message[0] = message[0].substring(1);
+//            if (message.length <= 2) {
+//                if (this.ShoutTable.containsKey(message[0])) {
+//                    int power = 1;
+//                    event.setCancelled(true);
+//
+//                    try {
+//                        if (message.length == 2) {
+//                            power = Integer.parseInt(message[1]);
+//                        }
+//                    } catch (NumberFormatException var8) {
+//                        SendMessage.sendMessage(dovahkiin,"Invalid parameter! Format is: /SHOUTNAME [power]");
+//                        return;
+//                    }
+//
+//                    if (power < 0 || power > 3) {
+//                        SendMessage.sendMessage(dovahkiin,"Invalid power! Must be 1, 2 or 3.");
+//                        return;
+//                    }
+//
+//                    int audible = Plugin.getInstance().getConfig().getInt("display.audible command");
+//                    if (audible > 0) {
+//                        String string = Plugin.getInstance().getConfig().getString("display.color");
+//                        if(string!=null) {
+//                            StringBuilder say = new StringBuilder(ChatColor.valueOf(string.toUpperCase()).toString());
+//
+//                            for(int i = 0; i < power; ++i) {
+//                                say.append(this.ShoutTable.get(message[0]).words()[i].toUpperCase()).append(" ");
+//                            }
+//
+//                            say.insert(say.length() - 1, '!');
+//                            if (audible == 1) {
+//                                SendMessage.sendMessage(dovahkiin,say.toString());
+//                            } else if (audible == 2) {
+//                                dovahkiin.chat(say.toString());
+//                            }
+//                        }
+//                    }
+//
+//                    shout(event.getPlayer().getUniqueId(), this.ShoutTable.get(message[0]), power);
+//                }
+//            }
+//        }
+//    }
 
-                    try {
-                        if (message.length == 2) {
-                            power = Integer.parseInt(message[1]);
-                        }
-                    } catch (NumberFormatException var8) {
-                        dovahkiin.sendMessage("Invalid parameter! Format is: /SHOUTNAME [power]");
-                        return;
-                    }
-
-                    if (power < 0 || power > 3) {
-                        dovahkiin.sendMessage("Invalid power! Must be 1, 2 or 3.");
-                        return;
-                    }
-
-                    int audible = Plugin.getInstance().getConfig().getInt("display.audible command");
-                    if (audible > 0) {
-                        String string = Plugin.getInstance().getConfig().getString("display.color");
-                        if(string!=null) {
-                            StringBuilder say = new StringBuilder(ChatColor.valueOf(string.toUpperCase()).toString());
-
-                            for(int i = 0; i < power; ++i) {
-                                say.append(this.ShoutTable.get(message[0]).words()[i].toUpperCase()).append(" ");
-                            }
-
-                            say.insert(say.length() - 1, '!');
-                            if (audible == 1) {
-                                dovahkiin.sendMessage(say.toString());
-                            } else if (audible == 2) {
-                                dovahkiin.chat(say.toString());
-                            }
-                        }
-                    }
-
-                    shout(event.getPlayer(), this.ShoutTable.get(message[0]), power);
-                }
-            }
-        }
-    }
-
-    public static void shout(Player dragonBorn, Shout word, int level) {
+    public static void shout(UUID dragonBorn, Shout word, int level) {
+        Player p = Bukkit.getPlayer(dragonBorn);
+        if(p == null || !p.isOnline()) return;
         if (level <= 3 && level >= 0) {
             Plugin instance = Plugin.getInstance();
             String shoutName = word.words()[0] + word.words()[1] + word.words()[2];
-            if (dragonBorn.hasPermission("thuum.shout." + shoutName + "." + level)) {
-                if (!dragonBorn.hasPermission("thuum.ignorecooldown." + shoutName + "." + level)
-                        && !instance.arngeir.putOnCooldown(dragonBorn, word, level)) {
+            if (p.hasPermission("thuum.shout." + shoutName + "." + level)) {
+                if (!p.hasPermission("thuum.ignorecooldown." + shoutName + "." + level)
+                        && !instance.arngeir.putOnCooldown(p, word, level)) {
                     String string = instance.getConfig().getString("cooldown.alert message");
-                    if(string!=null && !string.isEmpty()) dragonBorn.sendMessage(string);
+                    if(string!=null && !string.isEmpty()) p.sendMessage(string);
                 } else {
                     word.shout(dragonBorn, level);
                 }
@@ -126,7 +132,7 @@ public class GreyBeard implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         int persistence = Plugin.getInstance().getConfig().getInt("cooldown.persistence");
-        Bukkit.getScheduler().scheduleSyncDelayedTask(Plugin.getInstance(), new GreyBeard.ClearCooldowns(event.getPlayer()), persistence * 20L);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(Plugin.getInstance(), new GreyBeard.ClearCooldowns(event.getPlayer().getUniqueId()), persistence * 20L);
     }
 
     public boolean putOnCooldown(Player dovahkiin, Shout shout, int level) {
@@ -136,48 +142,49 @@ public class GreyBeard implements Listener {
             shout = ShoutType.FUSRODAH.shout;
         }
 
-        if (!this.onCooldown.containsKey(dovahkiin.getName())) {
-            this.onCooldown.put(dovahkiin.getName(), new HashSet<>());
+        if (!this.onCooldown.containsKey(dovahkiin.getUniqueId())) {
+            this.onCooldown.put(dovahkiin.getUniqueId(), new HashSet<>());
         }
 
-        if (this.onCooldown.get(dovahkiin.getName()).contains(shout)) {
+        if (this.onCooldown.get(dovahkiin.getUniqueId()).contains(shout)) {
             return false;
         } else {
-            this.onCooldown.get(dovahkiin.getName()).add(shout);
-            Cooldown task = new Cooldown(dovahkiin, shout);
+            this.onCooldown.get(dovahkiin.getUniqueId()).add(shout);
+            Cooldown task = new Cooldown(dovahkiin.getUniqueId(), shout);
             Bukkit.getScheduler().scheduleSyncDelayedTask(Plugin.getInstance(), task, cooldownDuration);
             return true;
         }
     }
 
     public class ClearCooldowns implements Runnable {
-        Player dovahkiin;
+        UUID uuid;
 
-        public ClearCooldowns(Player player) {
-            this.dovahkiin = player;
+        public ClearCooldowns(UUID player) {
+            this.uuid = player;
         }
 
         public void run() {
-            if (!this.dovahkiin.isOnline()) {
-                onCooldown.remove(this.dovahkiin.getName());
-            }
+            onCooldown.remove(this.uuid);
         }
     }
 
     public class Cooldown implements Runnable {
-        Player dovahkiin;
+        UUID uuid;
         Shout shout;
 
-        public Cooldown(Player player, Shout shout) {
-            this.dovahkiin = player;
+        public Cooldown(UUID uuid, Shout shout) {
+            this.uuid = uuid;
             this.shout = shout;
         }
 
         public void run() {
-            if (onCooldown.containsKey(this.dovahkiin.getName())) {
-                onCooldown.get(this.dovahkiin.getName()).remove(this.shout);
+            if (onCooldown.containsKey(uuid)) {
+                onCooldown.get(uuid).remove(this.shout);
                 String string = Plugin.getInstance().getConfig().getString("cooldown.ready message");
-                if(string!=null && !string.isEmpty()) this.dovahkiin.sendMessage();
+                if(string!=null && !string.isEmpty()) {
+                    Player player = Bukkit.getPlayer(uuid);
+                    if(player!=null && player.isOnline()) player.sendMessage(string);
+                }
             }
         }
     }
