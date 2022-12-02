@@ -2,7 +2,6 @@ package io.github.dailystruggle.thethuum.commands;
 
 import io.github.dailystruggle.thethuum.Plugin;
 import io.github.dailystruggle.thethuum.tools.SendMessage;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
@@ -18,8 +17,9 @@ public class ShoutCommand extends Command {
         super(name);
         this.executor = executor;
 
-        setPermissionMessage(ChatColor.RED + "I'm sorry, but you do not have permission to perform this command. " +
-                "Please contact server administrators if you believe that this is in error.");
+        setPermissionMessage(SendMessage.format(null,
+                Plugin.getInstance().getConfig().getString("pluginMessages.permission",
+                        "#AA0000I'm sorry, but you do not have permission to perform this command. Please contact server administrators if you believe that this is in error.")));
         String[] words = Plugin.getInstance().arngeir.ShoutTable.get(name).words();
         setDescription(words[3] + " - " + words[4]);
     }

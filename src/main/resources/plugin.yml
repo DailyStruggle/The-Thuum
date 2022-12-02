@@ -10,3 +10,16 @@ commands:
     permission: thuum.shout
     usage: |
       /shout
+  thuum:
+    description: "thuum root command"
+    permission: thuum.see
+    usage: |
+      /thuum
+
+permissions:
+  thuum.see:
+    default: op
+    description: "view thuum commands"
+  thuum.reload:
+    default: op
+    description: "reload config.yml"

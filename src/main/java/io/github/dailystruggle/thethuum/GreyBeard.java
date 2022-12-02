@@ -36,7 +36,6 @@ public class GreyBeard implements Listener {
                     int power = message.length;
                     if (event.getPlayer().hasPermission("thuum.shout." + shoutPermStr + "." + power)) {
                         String colorStr = Plugin.getInstance().getConfig().getString("display.color");
-                        Bukkit.getLogger().severe(colorStr);
                         colorStr = SendMessage.format(event.getPlayer(), colorStr);
                         switch (Plugin.getInstance().getConfig().getInt("display.audible chat")) {
                             case 1:

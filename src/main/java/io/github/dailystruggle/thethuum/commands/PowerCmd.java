@@ -1,11 +1,13 @@
 package io.github.dailystruggle.thethuum.commands;
 
 import io.github.dailystruggle.commandsapi.bukkit.localCommands.BukkitTreeCommand;
+import io.github.dailystruggle.commandsapi.common.CommandsAPI;
 import io.github.dailystruggle.commandsapi.common.CommandsAPICommand;
 import io.github.dailystruggle.thethuum.Plugin;
 import io.github.dailystruggle.thethuum.shouts.Shout;
 import io.github.dailystruggle.thethuum.tools.SendMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +22,6 @@ public class PowerCmd extends BukkitTreeCommand {
 
     public PowerCmd(Plugin plugin, @NotNull CommandsAPICommand parent, int pwr) {
         super(plugin, parent);
-        if(parent == null) throw new IllegalArgumentException();
         this.pwr = pwr;
     }
 
@@ -28,7 +29,9 @@ public class PowerCmd extends BukkitTreeCommand {
     public boolean onCommand(CommandSender sender, Map<String, List<String>> parameterValues, CommandsAPICommand nextCommand) {
         if(nextCommand!=null) return true;
         if(!(sender instanceof Player)) {
-            SendMessage.sendMessage(sender,"console shouts not supported");
+            SendMessage.sendMessage(sender,
+                    Plugin.getInstance().getConfig().getString(
+                            "pluginMessages.consoleNotSupported","console shouts not supported"));
             return true;
         }
         HashMap<String, Shout> ShoutTable = io.github.dailystruggle.thethuum.Plugin.getInstance().arngeir.ShoutTable;
@@ -66,6 +69,10 @@ public class PowerCmd extends BukkitTreeCommand {
 
     @Override
     public void msgBadParameter(UUID callerId, String parameterName, String parameterValue) {
-
+        CommandSender sender;
+        if(callerId.equals(CommandsAPI.serverId)) sender = Bukkit.getConsoleSender();
+        else sender = Bukkit.getPlayer(callerId);
+        if(sender == null) return;
+        SendMessage.sendMessage(sender, ChatColor.YELLOW + "invalid parameter " + parameterName + ":" + parameterValue);
     }
 }

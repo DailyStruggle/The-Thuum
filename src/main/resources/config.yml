@@ -1,3 +1,6 @@
+pluginMessages:
+    permission: "#AA0000I'm sorry, but you do not have permission to perform this command. Please contact server administrators if you believe that this is in error."
+    consoleNotSupported: "#AA0000console shouts not supported"
 display:
     audible chat: 2
     audible command: 2
